@@ -10,6 +10,7 @@
   <script src='/bower_components/jquery/dist/jquery.min.js'></script>
   <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
   <script src='/bower_components/socket.io-client/socket.io.js'></script>
+  <script src='dist/gauges.js'></script>
 </head>
 <body>
 
@@ -24,7 +25,7 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="#">SignalK log</a>
+        <a class="navbar-brand" href="#">SignalK simple gauges</a>
       </div>
 
       <!-- Collect the nav links, forms, and other content for toggling -->
@@ -48,7 +49,19 @@
     </div><!-- /.container-fluid -->
   </nav>
 
-  <div class="panel panel-default">
+<ul id="tabs" class="nav nav-tabs" role="tablist">
+  <li class="active"><a href="#gauges" role="tab" data-toggle="tab">Gauges</a></li>
+  <li><a href="#log" role="tab" data-toggle="tab">Log</a></li>
+</ul>  
+
+<div class="tab-content">
+  <div class="tab-pane active" id="gauges">
+    <canvas id="speedCanvas" ></canvas>
+    <canvas id="depthCanvas" ></canvas>
+    <canvas id="compassCanvas"></canvas>
+    <canvas id="windCanvas"></canvas>
+  </div>
+  <div class="tab-pane" id="log">
     <button type="button" class="btn btn-default btn-lg" id="pause">
       <span class="glyphicon glyphicon-pause"></span>
     </button>
@@ -58,9 +71,14 @@
     <div class="panel-body">
      <ul id='messages' class="list-group"></ul>
    </div>
+  </div>
+</div>
+
+  <div class="panel panel-default">
  </div>
 </body>
 <script>
+var gaugeSet = new simplegauges.GaugeSet();
 var socket;
 var manager;
 function prependToList(data) {
@@ -81,6 +99,7 @@ function connect(url) {
     if (isPlaying) {
       prependToList(JSON.stringify(data));
     }
+    gaugeSet.dispatch(data);
   });
   socket.on('error', function() { prependToList(arguments) });
   socket.on('connect_failed', function() { prependToList("Connect failed"); });
@@ -109,10 +128,16 @@ $(document).ready(function() {
   });
   $('#play').hide();
   $('#pause').hide();
+
   $('#deltastream').click(function(){ connect($('#deltastream').text())});
   $('#fullstream').click(function(){ connect($('#fullstream').text())});
   $( "form" ).submit(function( event ) { event.preventDefault();});
   $('#connectButton').click(function(){connect($('#address').val()); })
+
+  $('#myTab a').click(function (e) {
+    e.preventDefault()
+    $(this).tab('show')
+  });
 });
 </script>
 </html>
