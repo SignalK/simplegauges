@@ -7,6 +7,9 @@
   <link href="/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 
 
+<link rel="stylesheet" href="dist/default.css">
+<script src="dist/highlight.pack.js"></script>
+
   <script src='/bower_components/jquery/dist/jquery.min.js'></script>
   <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
   <script src='/bower_components/socket.io-client/socket.io.js'></script>
@@ -82,8 +85,14 @@ var gaugeSet = new simplegauges.GaugeSet();
 var socket;
 var manager;
 function prependToList(data) {
-  $('#messages').prepend('<li class="list-group-item">' + data + '</li>');
+  try {
+    var indented = JSON.stringify(JSON.parse(data), undefined, 2);
+  $('#messages').prepend('<li class="list-group-item"><pre><code>' + indented + '</code></pre></li>');
+  $('pre code:first').each(function(i, block) {
+    hljs.highlightBlock(block);
+  });
   $('#messages li').slice(20).remove();
+} catch (e) {}
 };
 
 function connect(url) {
