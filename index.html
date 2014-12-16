@@ -8,12 +8,11 @@
 
 
 <link rel="stylesheet" href="dist/default.css">
-<script src="dist/highlight.pack.js"></script>
 
+  <script src="dist/highlight.pack.js"></script>
+  <script src='dist/gauges.js'></script>
   <script src='/bower_components/jquery/dist/jquery.min.js'></script>
   <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-  <script src='/bower_components/socket.io-client/socket.io.js'></script>
-  <script src='dist/gauges.js'></script>
 </head>
 <body>
 
@@ -37,8 +36,7 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Pick source <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
-              <li><a href="#" id="fullstream">wss://localhost:3000/signalk/stream</a></li>
-              <li><a href="#" id="deltastream">wss://localhost:3000/signalk/stream/delta</a></li>
+              <li><a href="#" id="fullstream">localhost:3000</a></li>
             </ul>
           </li>
         </ul>
@@ -84,6 +82,10 @@
 var gaugeSet = new simplegauges.GaugeSet();
 var socket;
 var manager;
+
+function getSelfId(hostname) {
+  return "123456789"
+}
 function prependToList(data) {
   try {
     var indented = JSON.stringify(JSON.parse(data), undefined, 2);
@@ -95,32 +97,37 @@ function prependToList(data) {
 } catch (e) {}
 };
 
-function connect(url) {
-  if (socket) { socket.disconnect(); }
-  if (manager) { manager.close(); }
-
-  manager = io.Manager(url);
-  manager.on('connect_error', function() { prependToList("Connection error " + new Date()); });
-  manager.on('connect_timeout', function() { prependToList("Connection timeout " + new Date()); });
-
-  socket = io.connect(url);
-  socket.on('signalk', function(data) {
-    if (isPlaying) {
-      prependToList(JSON.stringify(data));
-    }
-    gaugeSet.dispatch(data);
-  });
-  socket.on('error', function() { prependToList(arguments) });
-  socket.on('connect_failed', function() { prependToList("Connect failed"); });
-  socket.on('connect', function() { 
-    $('#play').hide();
-    $('#pause').show();
-    isPlaying = true;
-    prependToList("Connected");
-  });
+function connect(hostname) {
+  gaugeSet.setSelfId(getSelfId(hostname));
+  connectWs(hostname, gaugeSet.dispatch);
   $('#address').val(url);
 };
 
+function connectWs(hostname, callback) {
+  var url = "ws://" + hostname + "/signalk/stream?stream=delta";
+  if (typeof Primus != 'undefined') {
+    var signalKStream = Primus.connect(url, {
+      reconnect: {
+        maxDelay: 15000,
+        minDelay: 500,
+        retries: Infinity
+      }
+    });
+    signalKStream.on('data', callback);
+  } else {
+    connection = new WebSocket(url);
+    connection.onopen = function(msg) {
+      console.log("open:" + msg);
+    };
+
+    connection.onerror = function(error) {
+      console.log("error:" + msg);
+    };
+    connection.onmessage = function(msg) {
+      callback(JSON.parse(msg.data));
+    };
+  }
+}
 
 var isPlaying = true;
 
