@@ -14,7 +14,7 @@ If you want to just tinker around you can edit directly `dist/gauges.js` and rel
 If you want your changes to persist over reinstalls you can 
 * fork the repository on Github
 * install your own fork
-* make the changes in `gauges.js`, package the `dist/gauges.js` with `gulp` and then refresh your browser
+* make the changes in `lib/simplegauges.js`, package the `dist/gauges.js` with `gulp` and then refresh your browser
 * commit the changes to your own repo 
 
 and hopefully eventually
