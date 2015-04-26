@@ -109,7 +109,7 @@ function connect(hostname) {
     console.log(selfId)
       gaugeSet.setSelfId(selfId); 
       connectWs(hostname, gaugeSet.dispatch); 
-      $('#address').val(url);
+      $('#address').val(hostname);
   });
 };
 
