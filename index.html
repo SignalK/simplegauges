@@ -85,7 +85,7 @@ var manager;
 
 function withSelfId(urlhost, callback) {
   $.ajax({
-    url: "http://" + urlhost + "/api/v1/",
+    url: "http://" + urlhost + "/signalk/api/v1/",
     async: true,
     success: function(signalktree) {
       callback(signalktree.self);
@@ -114,7 +114,7 @@ function connect(hostname) {
 };
 
 function connectWs(hostname, callback) {
-  var url = "ws://" + hostname + "/signalk/stream?stream=delta";
+  var url = "ws://" + hostname + "/signalk/stream/v1?stream=delta";
   if (typeof Primus != 'undefined') {
     var signalKStream = Primus.connect(url, {
       reconnect: {
