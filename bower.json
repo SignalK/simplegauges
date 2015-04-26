@@ -4,6 +4,9 @@
   "authors": [
     "Teppo Kurki"
   ],
+  "keywords": [
+    "signalk-ui"
+  ],
   "moduleType": [
     "globals"
   ],
