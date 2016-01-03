@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "signalk-client": "signalk/signalk-js-client",
     "ws": "^0.4.32"
   },
   "devDependencies": {
