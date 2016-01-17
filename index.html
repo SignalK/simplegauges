@@ -1,161 +1,175 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-
-
-<link rel="stylesheet" href="dist/default.css">
-
-  <script src="dist/highlight.pack.js"></script>
-  <script src='dist/gauges.js'></script>
-  <script src='/bower_components/jquery/dist/jquery.min.js'></script>
-  <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-</head>
-<body>
-
-
-  <nav class="navbar navbar-default" role="navigation">
-    <div class="container-fluid">
-      <!-- Brand and toggle get grouped for better mobile display -->
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="#">SignalK simple gauges</a>
-      </div>
-
-      <!-- Collect the nav links, forms, and other content for toggling -->
-      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        <ul class="nav navbar-nav">
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Pick source <span class="caret"></span></a>
-            <ul class="dropdown-menu" role="menu">
-              <li><a href="#" id="fullstream">localhost:3000</a></li>
-            </ul>
-          </li>
-        </ul>
-        <form class="navbar-form navbar-left" role="search">
-          <div class="form-group">
-            <input id="address" type="text" size="80" class="form-control" placeholder="or enter one">
-          </div>
-          <button id="connectButton" class="btn btn-default">Connect</button>
-        </form>
-      </div><!-- /.navbar-collapse -->
-    </div><!-- /.container-fluid -->
-  </nav>
-
-<ul id="tabs" class="nav nav-tabs" role="tablist">
-  <li class="active"><a href="#gauges" role="tab" data-toggle="tab">Gauges</a></li>
-  <li><a href="#log" role="tab" data-toggle="tab">Log</a></li>
-</ul>
-
-<div class="tab-content">
-  <div class="tab-pane active" id="gauges">
-    <canvas id="speedCanvas" ></canvas>
-    <canvas id="depthCanvas" ></canvas>
-    <canvas id="compassCanvas"></canvas>
-    <canvas id="windCanvas"></canvas>
-  </div>
-  <div class="tab-pane" id="log">
-    <button type="button" class="btn btn-default btn-lg" id="pause">
-      <span class="glyphicon glyphicon-pause"></span>
-    </button>
-    <button type="button" class="btn btn-default btn-lg" id="play">
-      <span class="glyphicon glyphicon-play"></span>
-    </button>
-    <div class="panel-body">
-     <ul id='messages' class="list-group"></ul>
-   </div>
-  </div>
-</div>
-
-  <div class="panel panel-default">
- </div>
-</body>
-<script>
-var gaugeSet = new simplegauges.GaugeSet();
-var socket;
-var manager;
-
-
-function prependToList(data) {
-  try {
-    var indented = JSON.stringify(JSON.parse(data), undefined, 2);
-  $('#messages').prepend('<li class="list-group-item"><pre><code>' + indented + '</code></pre></li>');
-  $('pre code:first').each(function(i, block) {
-    hljs.highlightBlock(block);
-  });
-  $('#messages li').slice(20).remove();
-} catch (e) {}
-};
-
-function connect(hostname) {
-  var skClient = new SignalK.Client(hostname);
-  var self = skClient.getSelf(hostname).then(function(selfData){
-    var selfId = selfData.body.uuid || selfData.body.mmsi;
-    gaugeSet.setSelfId(selfId);
-    skClient.connectDelta(hostname, gaugeSet.dispatch);
-    $('#address').val(hostname);
-  })
-};
-
-function connectWs(hostname, callback) {
-  var url = "ws://" + hostname + "/signalk/stream/v1?stream=delta";
-  if (typeof Primus != 'undefined') {
-    var signalKStream = Primus.connect(url, {
-      reconnect: {
-        maxDelay: 15000,
-        minDelay: 500,
-        retries: Infinity
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Signal K Simple Gauges</title>
+    <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="dist/default.css">
+    <script src="dist/highlight.pack.js"></script>
+    <script src='dist/gauges.js'></script>
+    <script src='/bower_components/jquery/dist/jquery.min.js'></script>
+    <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <style type="text/css">
+      .navbar-form {
+        border: 0 none;
+        padding: 0 15px;
       }
+
+      .flex {
+        padding-top: 15px;
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-around;
+      }
+
+      .flex-item {
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Signal K Simple Gauges</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="navbar">
+          <form class="navbar-form navbar-left">
+            <div class="input-group hidden" id="connect-form">
+              <input id="address" type="text" size="80" class="form-control"
+                placeholder="Enter address of Signal K Server">
+              <span class="input-group-btn">
+                <button id="connect" class="btn btn-default">Connect</button>
+              </span>
+            </div>
+            <button id="disconnect" class="btn btn-default">Disconnect</button>
+          </form>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+
+    <div class="container-fluid">
+      <ul id="tabs" class="nav nav-tabs" role="tablist">
+        <li class="active"><a href="#gauges" role="tab" data-toggle="tab">Gauges</a></li>
+        <li><a href="#log" role="tab" data-toggle="tab">Log</a></li>
+      </ul>
+
+      <div class="tab-content">
+        <div class="tab-pane active" id="gauges">
+          <div class="flex">
+            <canvas id="speedCanvas" class="flex-item"></canvas>
+            <canvas id="depthCanvas" class="flex-item"></canvas>
+            <canvas id="compassCanvas" class="flex-item"></canvas>
+            <canvas id="windCanvas" class="flex-item"></canvas>
+          </div>
+        </div>
+        <div class="tab-pane" id="log">
+          <button type="button" class="btn btn-default btn-lg" id="pause">
+            <span class="glyphicon glyphicon-pause"></span>
+          </button>
+          <button type="button" class="btn btn-default btn-lg" id="play">
+            <span class="glyphicon glyphicon-play"></span>
+          </button>
+          <div class="panel-body">
+           <ul id="messages" class="list-group"></ul>
+         </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    var gaugeSet = new simplegauges.GaugeSet();
+    var isPlaying = false;
+    var connected = false;
+    var socket;
+    var manager;
+    var selfId;
+    var connection;
+
+    function prependToList(data) {
+      try {
+        var indented = JSON.stringify(data, undefined, 2);
+        $('#messages').prepend('<li class="list-group-item"><pre><code>' + indented + '</code></pre></li>');
+        $('pre code:first').each(function(i, block) {
+          hljs.highlightBlock(block);
+        });
+        $('#messages li').slice(100).remove();
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
+    function connect(hostname) {
+      var skClient = new SignalK.Client(hostname);
+      var self = skClient.getSelf(hostname).then(function(selfData) {
+        selfId = selfData.body.uuid || selfData.body.mmsi;
+        gaugeSet.setSelfId(selfId);
+        connection = skClient.connectDelta(hostname, dispatch);
+        $('#address').val(hostname);
+      });
+
+      connected = true;
+    };
+
+    function disconnect() {
+      connection.disconnect();
+      gaugeSet.zero();
+    }
+
+    function dispatch(delta) {
+      gaugeSet.dispatch(delta);
+      if(delta.context === 'vessels.' + selfId) {
+        prependToList(delta.updates);
+      }
+    }
+
+    $(document).ready(function() {
+      $('#play').click(function(){
+        $('#play').toggle();
+        $('#pause').toggle();
+        isPlaying = true;
+      });
+
+      $('#pause').click(function(){
+        $('#play').toggle();
+        $('#pause').toggle();
+        isPlaying = false;
+      });
+
+      $('#play').hide();
+      $('#pause').hide();
+
+      $('#address')
+        .val(window.location.host);
+
+      $('form').submit(function(event) {
+        event.preventDefault();
+      });
+
+      $('#connect').click(function() {
+        connect($('#address').val());
+        $('#connect-form').addClass('hidden');
+        $('#disconnect').removeClass('hidden');
+      });
+
+      $('#disconnect').click(function() {
+        $('#connect-form').removeClass('hidden');
+        $('#disconnect').addClass('hidden');
+        if(connection)
+          connection.disconnect();
+      });
+
+      connect($('#address').val());
     });
-    signalKStream.on('data', callback);
-  } else {
-    connection = new WebSocket(url);
-    connection.onopen = function(msg) {
-      console.log("open:" + msg);
-    };
-
-    connection.onerror = function(error) {
-      console.log("error:" + msg);
-    };
-    connection.onmessage = function(msg) {
-      callback(JSON.parse(msg.data));
-    };
-  }
-}
-
-var isPlaying = true;
-
-$(document).ready(function() {
-  $('#play').click(function(){
-    $('#play').toggle();
-    $('#pause').toggle();
-    isPlaying = true;
-  });
-  $('#pause').click(function(){
-    $('#play').toggle();
-    $('#pause').toggle();
-    isPlaying = false;
-  });
-  $('#play').hide();
-  $('#pause').hide();
-
-  $('#deltastream').click(function(){ connect($('#deltastream').text())});
-  $('#fullstream').click(function(){ connect($('#fullstream').text())});
-  $( "form" ).submit(function( event ) { event.preventDefault();});
-  $('#connectButton').click(function(){connect($('#address').val()); })
-
-  $('#myTab a').click(function (e) {
-    e.preventDefault()
-    $(this).tab('show')
-  });
-});
-</script>
+  </script>
 </html>
