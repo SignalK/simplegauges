@@ -1,26 +1,13 @@
 Simplegauges
 ============
 
-Simple gauges for use with SignalK server. Install with 
-
-`bower install https://github.com/SignalK/simplegauges.git`
+Simple gauges for use with SignalK server.
 
 Developing
 ==========
-Simplegauges uses a build tool called `webpack` to package all the js source files into one under `dist/gauges.js`.
-To create a "production" build run `npm run build`. During development use `npm run watch`, which usually runs webpack
-when you save relevant source files.
 
-If you want your changes to persist over reinstalls you can 
-* fork the repository on Github
-* install your own fork
-* make the changes in `lib/simplegauges.js`, package the `dist/gauges.js` with webpack launched with npm run and then refresh your browser
-* commit the changes to your own repo 
+- `npm install` installs dependencies, including Bootstrap with bower in postinstall
+- `npm run watch` builds dist/gauges.js from the source js under /lib, then reload in browser to run the changed code
+- `npm run build` to build a "production" version of dist/gauges.js
 
-and hopefully eventually
-
-* contribute your additions back to the main simplegauges repository by creating a Github Pull Request.
-
-
-
-
+Please share your changes / additions on [Github](http://blog.scottlowe.org/2015/01/27/using-fork-branch-git-workflow/)!

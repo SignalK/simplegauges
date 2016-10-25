@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "bower install",
     "start": "npm run watch",
     "build": "webpack -p --devtool source-map",
     "watch": "webpack -d --watch"
@@ -16,6 +17,7 @@
     "ws": "^0.4.32"
   },
   "devDependencies": {
+    "bower": "^1.7.9",
     "json-loader": "^0.5.4",
     "webpack": "^1.12.9"
   }
