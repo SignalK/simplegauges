@@ -19,7 +19,7 @@ If you want your changes to persist over reinstalls you can
 
 and hopefully eventually
 
-* contribute your additions back to the main instrumentpanel repository by creating a Github Pull Request.
+* contribute your additions back to the main simplegauges repository by creating a Github Pull Request.
 
 
 
