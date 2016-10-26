@@ -96,7 +96,15 @@ function prependToList(data) {
 };
 
 function connect(hostname) {
-  var skClient = new SignalK.Client(hostname);
+  var skClient;
+  var parts = hostname.split(":");
+  if (parts[0] == hostname){
+	skClient = new SignalK.Client(parts[0]);
+  }
+  else {
+	skClient = new SignalK.Client(parts[0],parts[1]);
+  }
+  skClient = new SignalK.Client(parts[0],parts[1]);
   var self = skClient.getSelf(hostname).then(function(selfData){
     var selfId = selfData.body.uuid || selfData.body.mmsi;
     gaugeSet.setSelfId(selfId);
