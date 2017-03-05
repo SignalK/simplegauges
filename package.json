@@ -1,8 +1,11 @@
 {
   "name": "simplegauges",
   "version": "1.0.0",
-  "description": "",
+  "description": "Signal K demo webapp",
   "main": "index.js",
+  "keywords": [
+    "signalk-webapp"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "bower install",
