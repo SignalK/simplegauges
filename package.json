@@ -1,7 +1,7 @@
 {
-  "name": "simplegauges",
+  "name": "@signalk/simplegauges",
   "version": "1.0.0",
-  "description": "Signal K demo webapp",
+  "description": "Signal K demo webapp with simple gauges",
   "main": "index.js",
   "keywords": [
     "signalk-webapp"
