@@ -14,12 +14,8 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "signalk-client": "signalk/signalk-js-client",
-    "ws": "^0.4.32"
-  },
   "devDependencies": {
-    "bower": "^1.7.9",
+    "@signalk/client": "^0.1.1",
     "json-loader": "^0.5.4",
     "webpack": "^1.12.9"
   }
